@@ -1,0 +1,155 @@
+<style type="text/css">
+	.order_table {
+		width: 100%;
+		border: none;
+		padding: 10px;
+		border: 1px solid #999;
+	}
+
+	.order_table > tbody > tr {
+		width: 100%;
+	}
+
+	.order_table > tbody > tr > td {
+		border-bottom: 1px solid #999;
+		padding: 10px;
+		width: 100%;
+	}
+
+	.cart_table_details {
+		width: 100%;
+	}
+	.amount {
+		text-align: right;
+	}
+
+	.order_number {
+		color: #ff0000;
+	}
+
+	#total_amount {
+		color: #ff0000;
+	}
+
+	.product_qty {
+        border: 1px solid #999;
+        border-radius: 3px;
+        padding: 10px;
+        text-align: center;
+        margin-bottom: 10px;
+        width: 70px;
+    }
+    
+    .purchase_table {
+		width: 100%;
+        text-align: left;
+        border: 0px solid #ccc;
+        border-collapse: collapse;
+        
+	}
+
+	@media only screen and (max-width: 760px) {
+		.purchase_table {
+			display: block;
+        	overflow: auto;
+		}
+	}
+
+	.purchase_table > thead > tr {
+		box-shadow: 0px 5px 5px #ccc;
+	}
+
+	.purchase_table > thead > tr > th {
+		padding: 10px;
+	}
+
+	.purchase_table > tbody > tr {
+		border-bottom: 1px solid #ccc;
+	}
+
+	.purchase_table > tbody > tr > td {
+		padding: 15px;
+	}
+</style>
+
+<main class="mdl-layout__content">
+    <div class="mdl-grid" >
+		<div class="mdl-cell mdl-cell--3-col">
+			<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+				<select id="status" class="mdl-textfield__input">
+					<option value="pending">Pending</option>
+					<option value="paid">Paid</option>
+				</select>
+				<label class="mdl-textfield__label" for="status">Select status of purchase to filter</label>
+			</div>
+		</div>
+		<div class="mdl-cell mdl-cell--3-col">
+		    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+				<input type="text" id="name" class="mdl-textfield__input">
+				<label class="mdl-textfield__label" for="name">Client Name</label>
+			</div>
+		</div>
+		<div class="mdl-cell mdl-cell--2-col">
+		    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="search"><i class="material-icons">search</i> Search</button>
+		</div>
+		<div class="mdl-cell mdl-cell--4-col"></div>
+		<div class="mdl-cell mdl-cell--12-col">
+		   <table class="purchase_table">
+			    <thead>
+			        <tr>
+			            <th>ID</th>
+			            <th>Vendor Name</th>
+			            <th>Date</th>
+			            <th>Status</th>
+			            <th<?php if(isset($price_display)) { if($price_display == 'false') { echo ' style="display:none;"'; } } ?>>Amount</th>
+			        </tr>
+			    </thead>
+				<tbody>
+				    <?php for ($i=0; $i < count($txn) ; $i++) { 
+    					echo '<tr id="'.$txn[$i]->it_id.'"> <td> <b class="order_number">'.$txn[$i]->it_txn_no.'</b></td><td>'.$txn[$i]->ic_name.'</td><td>'.$txn[$i]->it_date.'</td><td>'.$txn[$i]->it_status.'</td><td class="amount"';
+    					if(isset($price_display)) { if($price_display == 'false') { echo ' style="display:none;"'; } }
+    					echo '>'.$txn[$i]->it_amount.'</td></tr>';	
+    				} ?>
+	            </tbody>
+	        </table>
+	    </div>
+	</div>
+	<button class="lower-button mdl-button mdl-button-done mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--accent" id="submit">
+		<i class="material-icons">add</i>
+	</button>
+</div>
+</div>
+</body>
+<script>
+	$(document).ready(function() {
+		$('.purchase_table').on('click', 'tr', function(e) {
+			e.preventDefault();
+
+			window.location = "<?php echo base_url().$type.'/Transactions/purchase_edit/'; ?>" + $(this).prop('id');
+		});
+
+		$('#search').click(function(e) {
+			e.preventDefault();
+			$.post('<?php echo base_url().$type."/Transactions/filter_purchase"; ?>', {
+			    'status' : $('#status').val(),
+			    'client' : $('#name').val()
+			}, function(d,s,x) { 
+			    $('.purchase_table > tbody').empty(); 
+			    var a=JSON.parse(d), b=""; 
+			    for(var i=0;i<a.length; i++) { 
+			        b+='<tr id="' + a[i].it_id + '"> <td> <b class="order_number">' + a[i].it_txn_no + '</b></td><td>' + a[i].ic_name + '</td><td>' + a[i].it_date + '</td><td>' + a[i].it_status + '</td><td class="amount"><?php if(isset($price_display)) { if($price_display == 'false') { echo ' style="display:none;"'; } } ?>' + a[i].it_amount + '</td></tr>';
+			        
+			    }
+			    $('.purchase_table > tbody').append(b); 
+			    
+			});
+		});
+
+		$('#submit').click(function(e) {
+			e.preventDefault();
+
+			window.location = "<?php echo base_url().$type.'/Transactions/purchase_add'; ?>";
+		});
+	});
+</script>
+</html>
